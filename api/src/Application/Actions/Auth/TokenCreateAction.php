@@ -21,7 +21,6 @@ final class TokenCreateAction
     ): ResponseInterface
     {
         $data = (array)$request->getParsedBody();
-
         $username = (string)($data['username'] ?? '');
         $password = (string)($data['password'] ?? '');
 
@@ -29,20 +28,12 @@ final class TokenCreateAction
          * @todo Authenticate using correct way... >_<"
          * $userAuthData = $this->userAuth->authenticate($username, $password);
          */
-        $isValidLogin = ($username === 'user' && $password === 'secret');
-
-        if (!$isValidLogin) {
-            // Invalid authentication credentials
-            return $response
-                ->withHeader('Content-Type', 'application/json')
-                ->withStatus(401, 'Unauthorized');
+        if (!$this->isValidLogin($username, $password)) {
+            return $this->unauthorizedResponse($response);
         }
 
-        // Create a fresh token
-        $token = $this->createFreshToken($username,);
-
+        $token = $this->createFreshToken(new JWTClaims($username));
         $lifetime = $this->jwtAuth->getLifetime();
-
         $result = [
             'access_token' => $token,
             'token_type' => 'Bearer',
@@ -55,12 +46,21 @@ final class TokenCreateAction
         return $response->withStatus(201);
     }
 
-    private function createFreshToken(string $username, ...$claims): ?string
+    private function isValidLogin($username, $password): bool
     {
-        $claims = [
-            'uid' => $username,
-            ...$claims
-        ];
-        return $this->jwtAuth->createJwt($claims);
+        return ($username === 'user' && $password === 'secret');
     }
+
+    private function createFreshToken(JWTClaims $jwtClaims): ?string
+    {
+        return $this->jwtAuth->createJwt($jwtClaims());
+    }
+
+    private function unauthorizedResponse(ResponseInterface $response) : ResponseInterface
+    {
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(401, 'Unauthorized');
+    }
+
 }
