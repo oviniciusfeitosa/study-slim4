@@ -3,6 +3,7 @@ Study case of slim framework 4
 
 
 ## Requirements 
+- **composer require slim/slim:"4.*"*
 - PHP 7.2+
 - Composer
 - php-mbstring
