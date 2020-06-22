@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Middleware;
+namespace App\Auth\Middleware;
 
 use App\Auth\JwtAuth;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -17,7 +17,7 @@ final class JwtAuthMiddleware implements MiddlewareInterface
 
     public function __construct(
         JwtAuth $jwtAuth,
-        ResponseFactoryInterface $responseFactory
+        ?ResponseFactoryInterface $responseFactory
     ) {
         $this->jwtAuth = $jwtAuth;
         $this->responseFactory = $responseFactory;
@@ -28,7 +28,6 @@ final class JwtAuthMiddleware implements MiddlewareInterface
         RequestHandlerInterface $handler
     ): ResponseInterface {
         $token = explode(' ', (string)$request->getHeaderLine('Authorization'))[1] ?? '';
-
         if (!$token || !$this->jwtAuth->validateToken($token)) {
             return $this->responseFactory->createResponse()
                 ->withHeader('Content-Type', 'application/json')

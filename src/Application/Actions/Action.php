@@ -12,43 +12,17 @@ use Slim\Exception\HttpNotFoundException;
 
 abstract class Action
 {
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected LoggerInterface $logger;
+    protected Request $request;
+    protected Response $response;
+    protected array $args;
 
-    /**
-     * @var Request
-     */
-    protected $request;
-
-    /**
-     * @var Response
-     */
-    protected $response;
-
-    /**
-     * @var array
-     */
-    protected $args;
-
-    /**
-     * @param LoggerInterface $logger
-     */
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
-    /**
-     * @param Request  $request
-     * @param Response $response
-     * @param array    $args
-     * @return Response
-     * @throws HttpNotFoundException
-     * @throws HttpBadRequestException
-     */
-    public function __invoke(Request $request, Response $response, $args): Response
+    public function __invoke(Request $request, Response $response, array $args): Response
     {
         $this->request = $request;
         $this->response = $response;
@@ -58,20 +32,13 @@ abstract class Action
             return $this->action();
         } catch (DomainRecordNotFoundException $e) {
             throw new HttpNotFoundException($this->request, $e->getMessage());
+        } catch (HttpBadRequestException $e) {
+            throw $e;
         }
     }
 
-    /**
-     * @return Response
-     * @throws DomainRecordNotFoundException
-     * @throws HttpBadRequestException
-     */
     abstract protected function action(): Response;
 
-    /**
-     * @return array|object
-     * @throws HttpBadRequestException
-     */
     protected function getFormData()
     {
         $input = json_decode(file_get_contents('php://input'));
@@ -84,7 +51,7 @@ abstract class Action
     }
 
     /**
-     * @param  string $name
+     * @param string $name
      * @return mixed
      * @throws HttpBadRequestException
      */
@@ -98,7 +65,7 @@ abstract class Action
     }
 
     /**
-     * @param  array|object|null $data
+     * @param array|object|null $data
      * @return Response
      */
     protected function respondWithData($data = null, int $statusCode = 200): Response
@@ -118,7 +85,7 @@ abstract class Action
         $this->response->getBody()->write($json);
 
         return $this->response
-                    ->withHeader('Content-Type', 'application/json')
-                    ->withStatus($payload->getStatusCode());
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus($payload->getStatusCode());
     }
 }
