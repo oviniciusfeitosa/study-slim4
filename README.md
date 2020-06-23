@@ -1,26 +1,43 @@
 # Study Slim 4
+
 Study case of slim framework 4
 
+## Requirements
 
-## Requirements 
-- **composer require slim/slim:"4.*"*
+- \*_composer require slim/slim:"4._"\*
 - PHP 7.2+
 - Composer
 - php-mbstring
 
 ## Start
 
-To run the application in development, you can run these commands 
+To run the application in development, you can run these commands
 
 ```bash
 composer start
 ```
 
-or 
+or
 
 ```bash
-docker-compose up 
+docker-compose up
 ```
+
+## Routes
+
+- POST
+
+  - `/jwt/create`
+  - Params
+    - username: user
+    - password: secret
+
+- GET
+
+  - `/users`
+
+- GET
+  - `/users/{id}`
 
 ## References
 
